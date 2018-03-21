@@ -41,14 +41,19 @@ class Main {
      */
     private static final String BASE_URL = "https://fantasy.rocket-league.com/team/%s/%d";
 
-    public static void main(String... args) throws Exception {
-        List<Stats> stats = getAllStats();
+    public static void main(String... args) {
 
-        // sort by total points over all weeks
-        stats.sort(Comparator.comparing(Stats::getTotalPoints)
-                .reversed());
+        try {
+            List<Stats> stats = getAllStats();
 
-        prettyPrintStats(stats);
+            // sort by total points over all weeks
+            stats.sort(Comparator.comparing(Stats::getTotalPoints)
+                    .reversed());
+
+            prettyPrintStats(stats);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     private static void prettyPrintStats(List<Stats> stats) throws IOException {
@@ -78,7 +83,8 @@ class Main {
                     .append(player);
             output.append("\n        Weekly MVP: ");
             int j = 1;
-            int max = stat.getStats().size();
+            int max = stat.getStats()
+                    .size();
 
             for (WeekStats st : stat.getStats()) {
                 Player mvp = st.getTopPlayer();
@@ -143,7 +149,8 @@ class Main {
                 throw new Exception(String.format("404 - Can't get stats for owner %s in week %d.", owner, week));
             }
 
-            Document doc = Jsoup.parse(response.body().string());
+            Document doc = Jsoup.parse(response.body()
+                    .string());
 
             String teamName = doc.getElementsByClass("rlg-grid")
                     .get(0)
