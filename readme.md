@@ -20,6 +20,12 @@ file to `output.txt`, and do the same with the `template_participants.txt`
 Then simply add users to the `participants.txt` file (one per line), and optionally modify
 the `output.txt` file to your likings (use `{DATA}` as placeholder for the data).
 
+**How to run**
+
+The jar file is executable, so simply double-click it. Alternatively, run `java -jar rlfantasy.jar` 
+in your command line.
+
+The app will output the result to a file named `rlfantasy.txt`.
 
 **Advanced: Building + Dependencies**
 

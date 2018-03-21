@@ -104,7 +104,7 @@ class Main {
             ++i;
         }
 
-        System.out.print(template.replace("{DATA}", output.toString()));
+        Files.write(Paths.get("rlfantasy.txt"), template.replace("{DATA}", output.toString()).getBytes());
     }
 
     private static List<Stats> getAllStats() throws IOException {
