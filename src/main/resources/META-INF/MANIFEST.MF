@@ -1,2 +1,5 @@
 Manifest-Version: 1.0
 Main-Class: ch.christiantroller.rlfantasy.Main
+Implementation-Version: 1.0
+Implementation-Title: RLFantasy
+Implementation-Vendor: https://twitter.com/drtrox

@@ -17,7 +17,8 @@ Simple: Download the latest release zip (containing 3 files: `rlfantasy.jar`,
 file to `output.txt`, and do the same with the `template_participants.txt` 
 (into `participants.txt`) file.
 
-Then simply add users to the `participants.txt` file (one per line), and optionally modify
+Then simply add users (important: **usernames** from RLFantasy, **NOT** team names!) to the 
+`participants.txt` file (one per line), and optionally modify
 the `output.txt` file to your likings (use `{DATA}` as placeholder for the data).
 
 **How to run**
