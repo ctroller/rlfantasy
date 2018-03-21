@@ -5,7 +5,7 @@ import java.util.List;
 
 class WeekStats {
     private final String teamName;
-    private final int points;
+    private int points;
     private final List<Player> players;
 
     public WeekStats(String teamName, int points, List<Player> players) {

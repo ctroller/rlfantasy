@@ -26,6 +26,13 @@ class Stats {
                 .getTeamName();
     }
 
+    public int getPointsUntilWeek(int currentWeek) {
+        return stats.stream()
+                .limit(currentWeek)
+                .mapToInt(WeekStats::getPoints)
+                .sum();
+    }
+
     public Player getOverallTopPlayer() {
         Map<String, Integer> points = stats.stream()
                 .map(WeekStats::getPlayers)

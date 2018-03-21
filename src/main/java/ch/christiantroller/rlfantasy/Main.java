@@ -12,8 +12,11 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import okhttp3.OkHttpClient;
@@ -56,23 +59,62 @@ class Main {
         }
     }
 
+    private static Map<String, Integer> getWeekRanking(List<Stats> stats, int week )
+    {
+        Map<String, Integer> returnValue = new HashMap<>();
+        List<Stats> ordered = stats.stream()
+                .sorted(Comparator.comparing( ( Stats s ) -> s.getPointsUntilWeek( week )).reversed())
+                .collect(Collectors.toList());
+
+        for( int i = 1; i <= ordered.size(); ++i )
+        {
+            Stats wS = ordered.get(i-1);
+            returnValue.put( wS.getOwner(), i );
+        }
+
+        return returnValue;
+    }
+
     private static void prettyPrintStats(List<Stats> stats) throws IOException {
         String template = new String(Files.readAllBytes(Paths.get("output.txt")));
 
         StringBuilder output = new StringBuilder();
         int i = 1;
-        int maxStatsNumberLen = String.valueOf(stats.size())
-                .length();
+        int maxStatsNumberLen = String.valueOf(stats.size()).length();
+
+        int lastWeek = stats.get(0).getStats().size() - 1;
+        Map<String, Integer> lastWeekRanking = Collections.emptyMap();
+        if( lastWeek > 0 )
+        {
+            lastWeekRanking = getWeekRanking( stats, lastWeek );
+        }
+
         for (Stats stat : stats) {
-            int curStatsNumberLen = String.valueOf(i)
-                    .length();
+            int curStatsNumberLen = String.valueOf(i).length();
             String align = new String(new char[maxStatsNumberLen - curStatsNumberLen + 1])
                     .replace("\0", " ");
             Player player = stat.getOverallTopPlayer();
+            String rankingStr = i + ".";
+
+            if( lastWeek > 0 )
+            {
+                int lastWeekRank = lastWeekRanking.get( stat.getOwner() );
+                rankingStr += " (" + ( i > lastWeekRank ? '-' : ( i < lastWeekRank ? '+' : '-' ) );
+                if( lastWeekRank != i )
+                {
+                    rankingStr += Math.abs( lastWeekRank - i );
+                }
+
+                rankingStr += ")";
+                if( lastWeekRank == i )
+                {
+                    rankingStr += " ";
+                }
+            }
+
             output.append("\n");
-            output.append(i)
-                    .append(".")
-                    .append(align)
+            output.append(rankingStr)
+                    .append( align )
                     .append(stat.getTeamName())
                     .append(" - ")
                     .append(stat.getOwner())
@@ -81,7 +123,7 @@ class Main {
                     .append(")");
             output.append(", Overall MVP: ")
                     .append(player);
-            output.append("\n        Weekly MVP: ");
+            output.append("\n             Weekly MVP: ");
             int j = 1;
             int max = stat.getStats()
                     .size();
@@ -95,7 +137,7 @@ class Main {
                         .append(mvp);
 
                 if (j < max) {
-                    output.append(" | \n");
+                    output.append(" | ");
                 }
 
                 ++j;
@@ -179,7 +221,7 @@ class Main {
                 players.add(new Player(playerName, points, position));
             }
 
-            return new WeekStats(teamName, Integer.parseInt(els.get(0)
+            return new WeekStats( teamName, Integer.parseInt(els.get(0)
                     .text()), players);
         } catch (IOException ex) {
             ex.printStackTrace();
