@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import okhttp3.OkHttpClient;
@@ -45,6 +46,8 @@ class Main {
     private static final String BASE_URL = "https://fantasy.rocket-league.com/team/%s/%d";
 
     public static void main(String... args) {
+
+        readProperties();
 
         try {
             List<Stats> stats = getAllStats();
@@ -227,5 +230,20 @@ class Main {
             ex.printStackTrace();
         }
         return null;
+    }
+
+    private static Properties properties = new Properties();
+    private static void readProperties () {
+        try {
+            properties.load(Files.newInputStream(Paths.get("rlfantasy.properties")));
+        }
+        catch( IOException ex )
+        {
+            ex.printStackTrace();
+        }
+    }
+
+    public static String getProperty( String property, String defaultValue ) {
+        return properties.getProperty( property, defaultValue );
     }
 }
