@@ -45,6 +45,15 @@ class Main {
      */
     private static final String BASE_URL = "https://fantasy.rocket-league.com/team/%s/%d";
 
+    private static final String PLACEHOLDER_USER = "{user}";
+    private static final String PLACEHOLDER_RANK = "{rank}";
+    private static final String PLACEHOLDER_RANKLOSSGAIN = "{rankLossGain}";
+    private static final String PLACEHOLDER_TEAMNAME = "{teamName}";
+    private static final String PLACEHOLDER_TOTALPOINTS = "{totalPoints}";
+    private static final String PLACEHOLDER_TOTALMVP = "{totalMVP}";
+    private static final String PROPERTY_FORMAT = "output_format";
+    private static final String DEFAULT_OUTPUT_FORMAT = "{rank}. {rankLossGain} {teamName} - {owner} ({totalPoints}), Overall MVP: {totalMVP}";
+
     public static void main(String... args) {
 
         readProperties();
@@ -81,6 +90,8 @@ class Main {
     private static void prettyPrintStats(List<Stats> stats) throws IOException {
         String template = new String(Files.readAllBytes(Paths.get("output.txt")));
 
+        String format = getProperty( PROPERTY_FORMAT, DEFAULT_OUTPUT_FORMAT );
+
         StringBuilder output = new StringBuilder();
         int i = 1;
         int maxStatsNumberLen = String.valueOf(stats.size()).length();
@@ -97,35 +108,31 @@ class Main {
             String align = new String(new char[maxStatsNumberLen - curStatsNumberLen + 1])
                     .replace("\0", " ");
             Player player = stat.getOverallTopPlayer();
-            String rankingStr = i + ".";
 
+            int rank = i;
+            if( rank > 1 ) {
+                output.append( "\n" );
+            }
+
+            String rankingLossGain = "";
             if( lastWeek > 0 )
             {
                 int lastWeekRank = lastWeekRanking.get( stat.getOwner() );
-                rankingStr += " (" + ( i > lastWeekRank ? '-' : ( i < lastWeekRank ? '+' : '-' ) );
+                rankingLossGain += ( i > lastWeekRank ? '-' : ( i < lastWeekRank ? '+' : '-' ) );
                 if( lastWeekRank != i )
                 {
-                    rankingStr += Math.abs( lastWeekRank - i );
-                }
-
-                rankingStr += ")";
-                if( lastWeekRank == i )
-                {
-                    rankingStr += " ";
+                    rankingLossGain += Math.abs( lastWeekRank - i );
                 }
             }
 
-            output.append("\n");
-            output.append(rankingStr)
-                    .append( align )
-                    .append(stat.getTeamName())
-                    .append(" - ")
-                    .append(stat.getOwner())
-                    .append(" (")
-                    .append(stat.getTotalPoints())
-                    .append(")");
-            output.append(", Overall MVP: ")
-                    .append(player);
+            output.append( format.replace( PLACEHOLDER_RANK, String.valueOf( rank ) )
+                    .replace( PLACEHOLDER_RANKLOSSGAIN, rankingLossGain + align )
+                    .replace( PLACEHOLDER_TEAMNAME, stat.getTeamName() )
+                    .replace( PLACEHOLDER_USER, stat.getOwner() )
+                    .replace( PLACEHOLDER_TOTALMVP, player.toString() )
+                    .replace( PLACEHOLDER_TOTALPOINTS, String.valueOf( stat.getTotalPoints() ) )
+            );
+
             output.append("\n             Weekly MVP: ");
             int j = 1;
             int max = stat.getStats()
