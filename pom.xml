@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>bla</groupId>
-    <artifactId>blo</artifactId>
-    <version>1.0</version>
+    <groupId>ch.christiantroller</groupId>
+    <artifactId>rlfantasy</artifactId>
+    <version>1.1</version>
 
     <packaging>jar</packaging>
     <build>
