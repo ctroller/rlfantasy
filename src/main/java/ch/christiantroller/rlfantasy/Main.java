@@ -51,20 +51,24 @@ class Main {
     private static final String PLACEHOLDER_TEAMNAME = "{teamName}";
     private static final String PLACEHOLDER_TOTALPOINTS = "{totalPoints}";
     private static final String PLACEHOLDER_TOTALMVP = "{totalMVP}";
+    private static final String PLACEHOLDER_WEEKLYMVP = "{weeklyMVPs}";
+    private static final String PLACEHOLDER_ALIGN = "{align}";
     private static final String PROPERTY_FORMAT = "output_format";
-    private static final String DEFAULT_OUTPUT_FORMAT = "{rank}. {rankLossGain} {teamName} - {owner} ({totalPoints}), Overall MVP: {totalMVP}";
+    private static final String DEFAULT_OUTPUT_FORMAT = "{rank}.[align}({rankLossGain}) {teamName} - {user} ({totalPoints}), Overall MVP: {totalMVP}";
 
     public static void main(String... args) {
 
         readProperties();
 
         try {
+            System.out.println( "Gathering stats..." );
             List<Stats> stats = getAllStats();
-
+            System.out.println( "\nDone!" );
             // sort by total points over all weeks
             stats.sort(Comparator.comparing(Stats::getTotalPoints)
                     .reversed());
 
+            System.out.println( "Printing..." );
             prettyPrintStats(stats);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -125,15 +129,7 @@ class Main {
                 }
             }
 
-            output.append( format.replace( PLACEHOLDER_RANK, String.valueOf( rank ) )
-                    .replace( PLACEHOLDER_RANKLOSSGAIN, rankingLossGain + align )
-                    .replace( PLACEHOLDER_TEAMNAME, stat.getTeamName() )
-                    .replace( PLACEHOLDER_USER, stat.getOwner() )
-                    .replace( PLACEHOLDER_TOTALMVP, player.toString() )
-                    .replace( PLACEHOLDER_TOTALPOINTS, String.valueOf( stat.getTotalPoints() ) )
-            );
-
-            output.append("\n             Weekly MVP: ");
+            StringBuilder weeklyMVP = new StringBuilder();
             int j = 1;
             int max = stat.getStats()
                     .size();
@@ -141,17 +137,27 @@ class Main {
             for (WeekStats st : stat.getStats()) {
                 Player mvp = st.getTopPlayer();
 
-                output.append("(")
+                weeklyMVP.append("(")
                         .append(j)
                         .append(") ")
                         .append(mvp);
 
                 if (j < max) {
-                    output.append(" | ");
+                    weeklyMVP.append(" | ");
                 }
 
                 ++j;
             }
+
+            output.append( format.replace( PLACEHOLDER_RANK, String.valueOf( rank ) )
+                    .replace( PLACEHOLDER_ALIGN, align )
+                    .replace( PLACEHOLDER_RANKLOSSGAIN, rankingLossGain )
+                    .replace( PLACEHOLDER_TEAMNAME, stat.getTeamName() )
+                    .replace( PLACEHOLDER_USER, stat.getOwner() )
+                    .replace( PLACEHOLDER_TOTALMVP, player.toString() )
+                    .replace( PLACEHOLDER_TOTALPOINTS, String.valueOf( stat.getTotalPoints() ) )
+                    .replace( PLACEHOLDER_WEEKLYMVP, weeklyMVP.toString() )
+            );
 
             ++i;
         }
@@ -171,10 +177,14 @@ class Main {
         List<WeekStats> returnValue = new ArrayList<>();
 
         long weekDiff = ChronoUnit.WEEKS.between(START_DATE, NOW) + 1;
+        System.out.print( "\n" + owner + "... Week 1" );
 
         for (int i = 1; i <= weekDiff; ++i) {
             try {
                 WeekStats stats = getStats(owner, i);
+                if( i > 1 ) {
+                    System.out.print( ", " + i );
+                }
                 if (stats != null) {
                     returnValue.add(stats);
                 }
@@ -228,7 +238,7 @@ class Main {
                         .text()
                         .replaceAll("Points: ", ""));
 
-                players.add(new Player(playerName, points, position));
+                players.add(Player.of(playerName, points, position));
             }
 
             return new WeekStats( teamName, Integer.parseInt(els.get(0)
