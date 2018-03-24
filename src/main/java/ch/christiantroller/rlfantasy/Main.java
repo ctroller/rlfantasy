@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import okhttp3.OkHttpClient;
@@ -44,15 +45,30 @@ class Main {
      */
     private static final String BASE_URL = "https://fantasy.rocket-league.com/team/%s/%d";
 
+    private static final String PLACEHOLDER_USER = "{user}";
+    private static final String PLACEHOLDER_RANK = "{rank}";
+    private static final String PLACEHOLDER_RANKLOSSGAIN = "{rankLossGain}";
+    private static final String PLACEHOLDER_TEAMNAME = "{teamName}";
+    private static final String PLACEHOLDER_TOTALPOINTS = "{totalPoints}";
+    private static final String PLACEHOLDER_TOTALMVP = "{totalMVP}";
+    private static final String PLACEHOLDER_WEEKLYMVP = "{weeklyMVPs}";
+    private static final String PLACEHOLDER_ALIGN = "{align}";
+    private static final String PROPERTY_FORMAT = "output_format";
+    private static final String DEFAULT_OUTPUT_FORMAT = "{rank}.{align}({rankLossGain}) {teamName} - {user} ({totalPoints}), Overall MVP: {totalMVP}";
+
     public static void main(String... args) {
 
-        try {
-            List<Stats> stats = getAllStats();
+        readProperties();
 
+        try {
+            System.out.println( "Gathering stats..." );
+            List<Stats> stats = getAllStats();
+            System.out.println( "\nDone!" );
             // sort by total points over all weeks
             stats.sort(Comparator.comparing(Stats::getTotalPoints)
                     .reversed());
 
+            System.out.println( "Printing..." );
             prettyPrintStats(stats);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -78,6 +94,8 @@ class Main {
     private static void prettyPrintStats(List<Stats> stats) throws IOException {
         String template = new String(Files.readAllBytes(Paths.get("output.txt")));
 
+        String format = getProperty( PROPERTY_FORMAT, DEFAULT_OUTPUT_FORMAT );
+
         StringBuilder output = new StringBuilder();
         int i = 1;
         int maxStatsNumberLen = String.valueOf(stats.size()).length();
@@ -94,36 +112,24 @@ class Main {
             String align = new String(new char[maxStatsNumberLen - curStatsNumberLen + 1])
                     .replace("\0", " ");
             Player player = stat.getOverallTopPlayer();
-            String rankingStr = i + ".";
 
+            int rank = i;
+            if( rank > 1 ) {
+                output.append( "\n" );
+            }
+
+            String rankingLossGain = "";
             if( lastWeek > 0 )
             {
                 int lastWeekRank = lastWeekRanking.get( stat.getOwner() );
-                rankingStr += " (" + ( i > lastWeekRank ? '-' : ( i < lastWeekRank ? '+' : '-' ) );
+                rankingLossGain += ( i > lastWeekRank ? '-' : ( i < lastWeekRank ? '+' : '-' ) );
                 if( lastWeekRank != i )
                 {
-                    rankingStr += Math.abs( lastWeekRank - i );
-                }
-
-                rankingStr += ")";
-                if( lastWeekRank == i )
-                {
-                    rankingStr += " ";
+                    rankingLossGain += Math.abs( lastWeekRank - i );
                 }
             }
 
-            output.append("\n");
-            output.append(rankingStr)
-                    .append( align )
-                    .append(stat.getTeamName())
-                    .append(" - ")
-                    .append(stat.getOwner())
-                    .append(" (")
-                    .append(stat.getTotalPoints())
-                    .append(")");
-            output.append(", Overall MVP: ")
-                    .append(player);
-            output.append("\n             Weekly MVP: ");
+            StringBuilder weeklyMVP = new StringBuilder();
             int j = 1;
             int max = stat.getStats()
                     .size();
@@ -131,17 +137,27 @@ class Main {
             for (WeekStats st : stat.getStats()) {
                 Player mvp = st.getTopPlayer();
 
-                output.append("(")
+                weeklyMVP.append("(")
                         .append(j)
                         .append(") ")
                         .append(mvp);
 
                 if (j < max) {
-                    output.append(" | ");
+                    weeklyMVP.append(" | ");
                 }
 
                 ++j;
             }
+
+            output.append( format.replace( PLACEHOLDER_RANK, String.valueOf( rank ) )
+                    .replace( PLACEHOLDER_ALIGN, align )
+                    .replace( PLACEHOLDER_RANKLOSSGAIN, rankingLossGain )
+                    .replace( PLACEHOLDER_TEAMNAME, stat.getTeamName() )
+                    .replace( PLACEHOLDER_USER, stat.getOwner() )
+                    .replace( PLACEHOLDER_TOTALMVP, player.toString() )
+                    .replace( PLACEHOLDER_TOTALPOINTS, String.valueOf( stat.getTotalPoints() ) )
+                    .replace( PLACEHOLDER_WEEKLYMVP, weeklyMVP.toString() )
+            );
 
             ++i;
         }
@@ -161,10 +177,14 @@ class Main {
         List<WeekStats> returnValue = new ArrayList<>();
 
         long weekDiff = ChronoUnit.WEEKS.between(START_DATE, NOW) + 1;
+        System.out.print( "\n" + owner + "... Week 1" );
 
         for (int i = 1; i <= weekDiff; ++i) {
             try {
                 WeekStats stats = getStats(owner, i);
+                if( i > 1 ) {
+                    System.out.print( ", " + i );
+                }
                 if (stats != null) {
                     returnValue.add(stats);
                 }
@@ -218,7 +238,7 @@ class Main {
                         .text()
                         .replaceAll("Points: ", ""));
 
-                players.add(new Player(playerName, points, position));
+                players.add(Player.of(playerName, points, position));
             }
 
             return new WeekStats( teamName, Integer.parseInt(els.get(0)
@@ -227,5 +247,20 @@ class Main {
             ex.printStackTrace();
         }
         return null;
+    }
+
+    private static Properties properties = new Properties();
+    private static void readProperties () {
+        try {
+            properties.load(Files.newInputStream(Paths.get("rlfantasy.properties")));
+        }
+        catch( IOException ex )
+        {
+            ex.printStackTrace();
+        }
+    }
+
+    public static String getProperty( String property, String defaultValue ) {
+        return properties.getProperty( property, defaultValue );
     }
 }

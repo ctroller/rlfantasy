@@ -41,7 +41,7 @@ class Stats {
 
         return points.entrySet()
                 .stream()
-                .map(s -> new Player(s.getKey(), s.getValue(), null))
+                .map(s -> Player.of(s.getKey(), s.getValue(), null))
                 .max(Comparator.comparing(Player::getPoints))
                 .orElse(null);
     }
