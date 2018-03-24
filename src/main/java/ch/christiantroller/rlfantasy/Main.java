@@ -54,7 +54,7 @@ class Main {
     private static final String PLACEHOLDER_WEEKLYMVP = "{weeklyMVPs}";
     private static final String PLACEHOLDER_ALIGN = "{align}";
     private static final String PROPERTY_FORMAT = "output_format";
-    private static final String DEFAULT_OUTPUT_FORMAT = "{rank}.[align}({rankLossGain}) {teamName} - {user} ({totalPoints}), Overall MVP: {totalMVP}";
+    private static final String DEFAULT_OUTPUT_FORMAT = "{rank}.{align}({rankLossGain}) {teamName} - {user} ({totalPoints}), Overall MVP: {totalMVP}";
 
     public static void main(String... args) {
 
