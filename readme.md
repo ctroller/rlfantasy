@@ -50,7 +50,7 @@ With the `rlfantasy.properties` (don't forget to rename from `template_`) you ca
 | `{teamName}` | RLFantasy Team Name | What A Cool Team! |
 | `{user}` | Username that belongs to the team | troxito |
 | `{totalPoints}` | Total Points of the team over all weeks | 12345 |
-| `{totalPoints}` | String representing the overall Team MVP | Tylacto, 5555pts |
+| `{totalMVP}` | String representing the overall Team MVP | Tylacto, 5555pts |
 | `{weeklyMVPs}` | String representing an enumeration of all MVPs per week | (1) Tylacto, 555pts [ATT] \| (2) Tylacto, 130pts [DEF] |
 
 
