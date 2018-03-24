@@ -28,6 +28,31 @@ in your command line.
 
 The app will output the result to a file named `rlfantasy.txt`.
 
+**Customizing Output**
+
+With the `rlfantasy.properties` (don't forget to rename from `template_`) you can customize the format of the output. The following variables are available to use:
+
+`player_format`:
+
+| **Variable** | **Description** | **Example** |
+| :--- | :--- | :--- |
+| `{name}` | Name of the player | Tylacto |
+| `{points}` | Points of the player | 123 |
+| `{position}` | Chosen player position | ATT |
+
+`output_format`:
+
+| **Variable** | **Description** | **Example** |
+| :--- | :--- | :--- |
+| `{rank}` | Current Weekly Rank | 6 |
+| `{align}` | Blank Space align to pretty print it a bit more |   |
+| `{rankLossGain}` | Rank Loss/Gain compared to last week | +3 |
+| `{teamName}` | RLFantasy Team Name | What A Cool Team! |
+| `{user}` | Username that belongs to the team | troxito |
+| `{totalPoints}` | Total Points of the team over all weeks | 12345 |
+| `{totalMVPs}` | String representing an enumeration of all MVPs per week | (1) Tylacto, 555pts [ATT] \| (2) Tylacto, 130pts [DEF] |
+
+
 **Advanced: Building + Dependencies**
 
 Simply build it with maven. 
