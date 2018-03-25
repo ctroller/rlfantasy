@@ -139,7 +139,7 @@ class Main {
 
                 weeklyMVP.append("(")
                         .append(j)
-                        .append(") ")
+                        .append(", " + st.getPlayingPlayers() + "/6) ")
                         .append(mvp);
 
                 if (j < max) {

@@ -31,4 +31,11 @@ class WeekStats {
                 .max(Comparator.comparing(Player::getPoints))
                 .orElse(null);
     }
+
+    public long getPlayingPlayers ()
+    {
+        return players.stream()
+                .filter( p -> p.getPoints() > 0 )
+                .count();
+    }
 }
